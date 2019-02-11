@@ -29,6 +29,8 @@ find_package(catkin REQUIRED COMPONENTS
 ## System dependencies are found with CMake's conventions
 find_package(Boost REQUIRED)
 find_package(Eigen3 REQUIRED)
+
+# set(OpenCV_DIR /opt/opencv3/share/OpenCV)
 find_package(OpenCV REQUIRED)
 find_package(SuiteSparse REQUIRED)
 

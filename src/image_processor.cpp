@@ -37,6 +37,10 @@ ImageProcessor::~ImageProcessor() {
   destroyAllWindows();
   //ROS_INFO("Feature lifetime statistics:");
   //featureLifetimeStatistics();
+    // try call log saving?
+    // saveTimeLog("/home/yipuzhao/catkin_ws/tmpLog_front.txt");
+    saveTimeLog("/mnt/DATA/tmpLog_front.txt");
+    
   return;
 }
 
@@ -211,6 +215,7 @@ void ImageProcessor::stereoCallback(
     const sensor_msgs::ImageConstPtr& cam1_img) {
 
   //cout << "==================================" << endl;
+ros::Time time_init = ros::Time::now();
 
   // Get the current image.
   cam0_curr_img_ptr = cv_bridge::toCvShare(cam0_img,
@@ -229,11 +234,14 @@ void ImageProcessor::stereoCallback(
     //    (ros::Time::now()-start_time).toSec());
     is_first_img = false;
 
+#ifdef DEBUG_VIZ
     // Draw results.
     start_time = ros::Time::now();
     drawFeaturesStereo();
     //ROS_INFO("Draw features: %f",
     //    (ros::Time::now()-start_time).toSec());
+#endif
+    
   } else {
     // Track the feature in the previous image.
     ros::Time start_time = ros::Time::now();
@@ -252,21 +260,33 @@ void ImageProcessor::stereoCallback(
     pruneGridFeatures();
     //ROS_INFO("Prune grid features: %f",
     //    (ros::Time::now()-start_time).toSec());
-
+    
+#ifdef DEBUG_VIZ
     // Draw results.
     start_time = ros::Time::now();
     drawFeaturesStereo();
     //ROS_INFO("Draw features: %f",
     //    (ros::Time::now()-start_time).toSec());
+#endif
+    
   }
 
   //ros::Time start_time = ros::Time::now();
   //updateFeatureLifetime();
   //ROS_INFO("Statistics: %f",
   //    (ros::Time::now()-start_time).toSec());
-
+  
   // Publish features in the current image.
   ros::Time start_time = ros::Time::now();
+
+  //------------------------------------------
+  // add by Yipu
+  double proc_time = (start_time - time_init).toSec();
+  // std::cout << "front: " << proc_time << std::endl;
+  logTimeCost.push_back(timeLog(cam0_curr_img_ptr->header.stamp.toSec(), proc_time));
+  //------------------------------------------
+  
+  //
   publish();
   //ROS_INFO("Publishing: %f",
   //    (ros::Time::now()-start_time).toSec());

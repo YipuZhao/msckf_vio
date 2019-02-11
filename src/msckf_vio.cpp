@@ -177,6 +177,7 @@ bool MsckfVio::loadParameters() {
 }
 
 bool MsckfVio::createRosIO() {
+  msf_odom_pub = nh.advertise<geometry_msgs::PoseWithCovarianceStamped>("msf_odom", 10);
   odom_pub = nh.advertise<nav_msgs::Odometry>("odom", 10);
   feature_pub = nh.advertise<sensor_msgs::PointCloud2>(
       "feature_point_cloud", 10);
@@ -373,7 +374,11 @@ void MsckfVio::featureCallback(
 
   static double max_processing_time = 0.0;
   static int critical_time_cntr = 0;
-  double processing_start_time = ros::Time::now().toSec();
+    
+  
+  //------------------------------------------
+  // add by Yipu
+  ros::Time processing_start_time = ros::Time::now();
 
   // Propogate the IMU state.
   // that are received before the image msg.
@@ -383,10 +388,11 @@ void MsckfVio::featureCallback(
       ros::Time::now()-start_time).toSec();
 
   // Augment the state vector.
-  start_time = ros::Time::now();
+    start_time = ros::Time::now();
   stateAugmentation(msg->header.stamp.toSec());
   double state_augmentation_time = (
       ros::Time::now()-start_time).toSec();
+
 
   // Add new observations for existing features or new
   // features in the map server.
@@ -415,9 +421,11 @@ void MsckfVio::featureCallback(
   // Reset the system if necessary.
   onlineReset();
 
-  double processing_end_time = ros::Time::now().toSec();
   double processing_time =
-    processing_end_time - processing_start_time;
+    (ros::Time::now() - processing_start_time).toSec();
+    //------------------------------------------
+    
+    
   if (processing_time > 1.0/frame_rate) {
     ++critical_time_cntr;
     ROS_INFO("\033[1;31mTotal processing time %f/%d...\033[0m",
@@ -435,7 +443,16 @@ void MsckfVio::featureCallback(
     //printf("Publish time: %f/%f\n",
     //    publish_time, publish_time/processing_time);
   }
-
+  
+  
+  //
+// add by Yipu
+//  std::cout << msg->header.stamp.toSec() << "; " << *(msg->proc_time) << "; " << *(msg->proc_time) + processing_time << std::endl;
+//  logTimeCost.push_back(timeLog(msg->header.stamp.toSec(), *(msg->proc_time), *(msg->proc_time) + processing_time));
+ // std::cout << "back: " << processing_time << std::endl;
+  logTimeCost.push_back(timeLog(msg->header.stamp.toSec(), processing_time));
+  
+  
   return;
 }
 
@@ -1084,8 +1101,16 @@ void MsckfVio::removeLostFeatures() {
   //cout << "jacobian row #: " << jacobian_row_size << endl;
 
   // Remove the features that do not have enough measurements.
-  for (const auto& feature_id : invalid_feature_ids)
+  for (const auto& feature_id : invalid_feature_ids) {
+    // 
+#ifdef LOGGING_LMK_LIFE
+    const StateIDType& first_cam_id = map_server[feature_id].observations.begin()->first;
+    const StateIDType& last_cam_id = (--map_server[feature_id].observations.end())->first;
+    //cout << "id = " << feature_id << "; life = " << last_cam_id-first_cam_id+1 << endl;
+    logLmk.push_back({feature_id, last_cam_id-first_cam_id+1});
+#endif
     map_server.erase(feature_id);
+  }
 
   // Return if there is no lost feature to be processed.
   if (processed_feature_ids.size() == 0) return;
@@ -1125,8 +1150,15 @@ void MsckfVio::removeLostFeatures() {
   measurementUpdate(H_x, r);
 
   // Remove all processed features from the map.
-  for (const auto& feature_id : processed_feature_ids)
+  for (const auto& feature_id : processed_feature_ids) {
+#ifdef LOGGING_LMK_LIFE
+    const StateIDType& first_cam_id = map_server[feature_id].observations.begin()->first;
+    const StateIDType& last_cam_id = (--map_server[feature_id].observations.end())->first;
+    //cout << "id = " << feature_id << "; life = " << last_cam_id-first_cam_id+1 << endl;
+    logLmk.push_back({feature_id, last_cam_id-first_cam_id+1});
+#endif
     map_server.erase(feature_id);
+  }
 
   return;
 }
@@ -1375,6 +1407,14 @@ void MsckfVio::publish(const ros::Time& time) {
     IMUState::T_imu_body.inverse();
   Eigen::Vector3d body_velocity =
     IMUState::T_imu_body.linear() * imu_state.velocity;
+    
+    
+  
+  //
+  // add by Yipu
+  // save real-time published imu state for batch eval
+  logFramePose.push_back( trackLog( time.toSec(), T_b_w.translation(), rotationToQuaternion(T_b_w.linear()) ) );
+  
 
   // Publish tf
   if (publish_tf) {
@@ -1420,6 +1460,54 @@ void MsckfVio::publish(const ros::Time& time) {
       odom_msg.twist.covariance[i*6+j] = P_body_vel(i, j);
 
   odom_pub.publish(odom_msg);
+  
+  //-----------------------------------------------------------------------
+  // Publish the odometry for msf fusion
+    // Prepare all the required data.
+        // tf::Matrix3x3 Ric( 0,  0,  1,
+      //                    -1,  0,  0,
+      //                    0,  -1,  0);
+      // tf::Matrix3x3 Ric( 0,  -1,  0,
+      //                    1,  0,  0,
+      //                    0,  0,  1);
+            tf::Matrix3x3 Ric( 1,  0,  0,
+                         0,  1,  0,
+                         0,  0,  1);
+  const CAMState& cam_state = state_server.cam_states[state_server.imu_state.id];
+  Eigen::Vector4d qq = cam_state.orientation;
+  Eigen::Vector3d pp = cam_state.position;
+  // Cam0 pose.
+  /*
+  Eigen::Isometry3d T_c_w = Eigen::Isometry3d::Identity();
+  T_c_w.linear() = quaternionToRotation(
+      cam_state.orientation).transpose();
+  T_c_w.translation() = cam_state.position;
+	
+  geometry_msgs::PoseWithCovarianceStamped msf_odom_msg;
+  msf_odom_msg.header.stamp = time;
+  msf_odom_msg.header.frame_id = "map";
+  tf::poseEigenToMsg(T_c_w.inverse(), msf_odom_msg.pose.pose);
+  */
+  
+  tf::Quaternion quat ( tfScalar(qq(0)), tfScalar(qq(1)), tfScalar(qq(2)), tfScalar(qq(3)));
+  tf::Transform tfTiw ( Ric * tf::Matrix3x3( quat ), Ric * tf::Vector3( tfScalar(pp[0]), tfScalar(pp[1]), tfScalar(pp[2]) ) );
+  
+  geometry_msgs::Transform gmTwi;
+        tf::transformTFToMsg(tfTiw, gmTwi);
+        
+        geometry_msgs::Pose camera_pose_in_imu;
+        camera_pose_in_imu.position.x = gmTwi.translation.x;
+        camera_pose_in_imu.position.y = gmTwi.translation.y;
+        camera_pose_in_imu.position.z = gmTwi.translation.z;
+        camera_pose_in_imu.orientation = gmTwi.rotation;
+    
+        geometry_msgs::PoseWithCovarianceStamped camera_odom_in_imu;
+        camera_odom_in_imu.header.stamp = time;
+        camera_odom_in_imu.header.frame_id = "map";
+        camera_odom_in_imu.pose.pose = camera_pose_in_imu;
+	
+  msf_odom_pub.publish(camera_odom_in_imu);
+  //-----------------------------------------------------------------------
 
   // Publish the 3D positions of the features that
   // has been initialized.
@@ -1442,6 +1530,7 @@ void MsckfVio::publish(const ros::Time& time) {
 
   return;
 }
+
 
 } // namespace msckf_vio
 

@@ -22,7 +22,20 @@
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
 
+#define DEBUG_VIZ
+
 namespace msckf_vio {
+
+  class timeLog {
+public:
+  timeLog(const double &timeStamp_, const double &timeCost_) {
+    time_stamp = timeStamp_;
+    time_cost = timeCost_;
+  };
+
+  double time_stamp;
+  double time_cost;
+};
 
 /*
  * @brief ImageProcessor Detects and tracks features
@@ -66,6 +79,31 @@ private:
     double stereo_threshold;
   };
 
+  
+ // double proc_time;
+    
+    // save the time cost of msckf
+  std::vector<timeLog> logTimeCost;
+  
+  void saveTimeLog(const std::string &filename) {
+
+    std::cout << std::endl << "Saving " << this->logTimeCost.size() << " records to time log file " << filename << " ..." << std::endl;
+
+    std::ofstream fFrameTimeLog;
+    fFrameTimeLog.open(filename.c_str());
+    fFrameTimeLog << std::fixed;
+    fFrameTimeLog << "#frame_time_stamp time_proc" << std::endl;
+    for(size_t i=0; i<this->logTimeCost.size(); i++)
+    {
+        fFrameTimeLog << std::setprecision(6)
+                      << this->logTimeCost[i].time_stamp << " "
+                      << this->logTimeCost[i].time_cost << std::endl;
+    }
+    fFrameTimeLog.close();
+
+    std::cout << "Finished saving log! " << std::endl;
+}
+  
   /*
    * @brief FeatureIDType An alias for unsigned long long int.
    */
