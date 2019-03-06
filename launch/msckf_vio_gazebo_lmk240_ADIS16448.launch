@@ -34,19 +34,11 @@
       <param name="feature/config/translation_threshold" value="-1.0"/>
 
       <!-- These values should be standard deviation -->
-      <!-- ADIS 16448
+      <!-- ADIS 16448 -->
       <param name="noise/gyro" value="0.0004"/>
       <param name="noise/acc" value="0.0022563"/>
       <param name="noise/gyro_bias" value="3e-6"/>
       <param name="noise/acc_bias" value="8e-5"/>
-      <param name="noise/feature" value="0.035"/>
-      -->
-
-      <!-- mpu6000 -->
-      <param name="noise/gyro" value="0.00276"/>
-      <param name="noise/acc" value="0.03924"/>
-      <param name="noise/gyro_bias" value="3e-4"/>
-      <param name="noise/acc_bias" value="8e-3"/>
       <param name="noise/feature" value="0.035"/>
       
 
