@@ -1,3 +1,10 @@
+To execute msckf_vio properly, please create a separate catkin workspace with the following config:
+catkin config -DCMAKE_BUILD_TYPE=Release
+
+Also, building with customized opencv3 seems leading to inferior performance.
+
+---
+
 # MSCKF\_VIO
 
 
