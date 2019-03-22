@@ -9,9 +9,9 @@ import signal
 # SeqNameList = ['V1_03_difficult', 'V2_02_medium', 'V2_03_difficult'];
 SeqNameList = ['MH_01_easy', 'MH_02_easy', 'MH_03_medium', 'MH_04_difficult', 'MH_05_difficult', 'V1_01_easy', 'V1_02_medium', 'V1_03_difficult', 'V2_01_easy', 'V2_02_medium', 'V2_03_difficult'];
 
-Result_root = '/mnt/DATA/tmp/EuRoC/msckf_Stereo_Baseline_v2/'
+Result_root = '/mnt/DATA/tmp/EuRoC/msckf_Stereo_Baseline/'
 
-Number_GF_List = [80]; 
+Number_GF_List = [70, 150, 200, 400]; 
 
 Num_Repeating = 10 # 20 # 1 # 
 SleepTime = 5
@@ -46,12 +46,12 @@ for ri, num_gf in enumerate(Number_GF_List):
 
             File_rosbag  = '/mnt/DATA/Datasets/EuRoC_dataset/BagFiles/' + SeqName + '.bag'
 
-            cmd_slam   = str('roslaunch msckf_vio msckf_vio_euroc.launch')
+            cmd_slam   = str('roslaunch msckf_vio msckf_vio_euroc.launch track_per_frame:=') + str(num_gf)
             cmd_rosbag = 'rosbag play ' + File_rosbag # + ' -r 0.5' # + ' -u 30' # 
-            cmd_lmklog = str('cp /mnt/DATA/tmpLog_lmk.txt ' + Experiment_dir + '/' + SeqName + '_Log_lmk.txt')
-            cmd_timelog_1 = str('cp /mnt/DATA/tmpLog_front.txt ' + Experiment_dir + '/' + SeqName + '_Log_front.txt')
-            cmd_timelog_2 = str('cp /mnt/DATA/tmpLog_back.txt ' + Experiment_dir + '/' + SeqName + '_Log_back.txt')
-            cmd_tracklog = str('cp /mnt/DATA/tmpTrack.txt ' + Experiment_dir + '/' + SeqName + '_AllFrameTrajectory.txt')
+            cmd_lmklog = str('cp /mnt/DATA/msckf_tmpLog_lmk.txt ' + Experiment_dir + '/' + SeqName + '_Log_lmk.txt')
+            cmd_timelog_1 = str('cp /mnt/DATA/msckf_tmpLog_front.txt ' + Experiment_dir + '/' + SeqName + '_Log_front.txt')
+            cmd_timelog_2 = str('cp /mnt/DATA/msckf_tmpLog_back.txt ' + Experiment_dir + '/' + SeqName + '_Log_back.txt')
+            cmd_tracklog = str('cp /mnt/DATA/msckf_tmpTrack.txt ' + Experiment_dir + '/' + SeqName + '_AllFrameTrajectory.txt')
 
             print bcolors.WARNING + "cmd_slam: \n"   + cmd_slam   + bcolors.ENDC
             print bcolors.WARNING + "cmd_rosbag: \n" + cmd_rosbag + bcolors.ENDC

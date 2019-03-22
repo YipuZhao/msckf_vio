@@ -39,7 +39,7 @@ ImageProcessor::~ImageProcessor() {
   //featureLifetimeStatistics();
     // try call log saving?
     // saveTimeLog("/home/yipuzhao/catkin_ws/tmpLog_front.txt");
-    saveTimeLog("/mnt/DATA/tmpLog_front.txt");
+    saveImgTimeLog("/mnt/DATA/msckf_tmpLog_front.txt");
     
   return;
 }
@@ -283,7 +283,7 @@ ros::Time time_init = ros::Time::now();
   // add by Yipu
   double proc_time = (start_time - time_init).toSec();
   // std::cout << "front: " << proc_time << std::endl;
-  logTimeCost.push_back(timeLog(cam0_curr_img_ptr->header.stamp.toSec(), proc_time));
+  logTimeCost.push_back(imgTimeLog(cam0_curr_img_ptr->header.stamp.toSec(), proc_time, static_cast<size_t>(after_ransac)));
   //------------------------------------------
   
   //

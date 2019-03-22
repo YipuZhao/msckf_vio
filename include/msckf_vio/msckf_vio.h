@@ -45,15 +45,22 @@ namespace msckf_vio {
 */
 
 
-class timeLog {
+class vioTimeLog {
 public:
-  timeLog(const double &timeStamp_, const double &timeCost_) {
+  vioTimeLog(const double &timeStamp_, const double &timeCost_) {
     time_stamp = timeStamp_;
     time_cost = timeCost_;
   };
 
+  vioTimeLog(const double &timeStamp_, const double &timeCost_, const size_t &numStates_) {
+    time_stamp = timeStamp_;
+    time_cost = timeCost_;
+    num_states = numStates_;
+  };
+  
   double time_stamp;
   double time_cost;
+  size_t num_states;
 };
 
 
@@ -103,12 +110,12 @@ class MsckfVio {
     ~MsckfVio() {
       // try call log saving?
     // saveTimeLog("/home/yipuzhao/catkin_ws/tmpLog_back.txt");
-    saveLmkLog("/mnt/DATA/tmpLog_lmk.txt");
+    saveLmkLog("/mnt/DATA/msckf_tmpLog_lmk.txt");
     // saveTimeLog("/home/yipuzhao/catkin_ws/tmpLog_back.txt");
-    saveTimeLog("/mnt/DATA/tmpLog_back.txt");
+    saveVIOTimeLog("/mnt/DATA/msckf_tmpLog_back.txt");
       // also save the real time track
     // saveAllFrameTrack("/home/yipuzhao/catkin_ws/tmpTrack.txt");
-    saveAllFrameTrack("/mnt/DATA/tmpTrack.txt");
+    saveAllFrameTrack("/mnt/DATA/msckf_tmpTrack.txt");
     }
 
     /*
@@ -164,21 +171,23 @@ class MsckfVio {
 }
     
     // save the time cost of msckf
-    std::vector<timeLog> logTimeCost;
+    std::vector<vioTimeLog> logTimeCost;
   
-  void saveTimeLog(const std::string &filename) {
+  void saveVIOTimeLog(const std::string &filename) {
 
-    std::cout << std::endl << "Saving " << this->logTimeCost.size() << " records to time log file " << filename << " ..." << std::endl;
+    std::cout << std::endl << "Saving " << this->logTimeCost.size() << " VIO records to time log file " << filename << " ..." << std::endl;
 
     std::ofstream fFrameTimeLog;
     fFrameTimeLog.open(filename.c_str());
     fFrameTimeLog << std::fixed;
-    fFrameTimeLog << "#frame_time_stamp time_proc" << std::endl;
+    fFrameTimeLog << "#frame_time_stamp time_proc num_states" << std::endl;
     for(size_t i=0; i<this->logTimeCost.size(); i++)
     {
 	fFrameTimeLog << std::setprecision(6)
 		      << this->logTimeCost[i].time_stamp << " "
-		      << this->logTimeCost[i].time_cost << std::endl;
+		      << this->logTimeCost[i].time_cost  << " "
+		      << std::setprecision(0)
+		      << this->logTimeCost[i].num_states << std::endl;
     }
     fFrameTimeLog.close();
 

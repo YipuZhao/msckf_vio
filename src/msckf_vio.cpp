@@ -393,7 +393,11 @@ void MsckfVio::featureCallback(
   double state_augmentation_time = (
       ros::Time::now()-start_time).toSec();
 
-
+  size_t num_states = state_server.state_cov.rows();
+  //size_t old_cols = state_server.state_cov.cols();
+  //ROS_INFO("\033[1;31mold_rows %d/ old_cols %d...\033[0m",
+  //      old_rows, old_cols);
+      
   // Add new observations for existing features or new
   // features in the map server.
   start_time = ros::Time::now();
@@ -448,9 +452,9 @@ void MsckfVio::featureCallback(
   //
 // add by Yipu
 //  std::cout << msg->header.stamp.toSec() << "; " << *(msg->proc_time) << "; " << *(msg->proc_time) + processing_time << std::endl;
-//  logTimeCost.push_back(timeLog(msg->header.stamp.toSec(), *(msg->proc_time), *(msg->proc_time) + processing_time));
+//  logTimeCost.push_back(vioTimeLog(msg->header.stamp.toSec(), *(msg->proc_time), *(msg->proc_time) + processing_time));
  // std::cout << "back: " << processing_time << std::endl;
-  logTimeCost.push_back(timeLog(msg->header.stamp.toSec(), processing_time));
+  logTimeCost.push_back(vioTimeLog(msg->header.stamp.toSec(), processing_time, num_states));
   
   
   return;

@@ -26,15 +26,22 @@
 
 namespace msckf_vio {
 
-  class timeLog {
+  class imgTimeLog {
 public:
-  timeLog(const double &timeStamp_, const double &timeCost_) {
+  imgTimeLog(const double &timeStamp_, const double &timeCost_) {
     time_stamp = timeStamp_;
     time_cost = timeCost_;
+  };
+  
+  imgTimeLog(const double &timeStamp_, const double &timeCost_, const size_t &numTrack_) {
+    time_stamp = timeStamp_;
+    time_cost = timeCost_;
+    num_track = numTrack_;
   };
 
   double time_stamp;
   double time_cost;
+  size_t num_track;
 };
 
 /*
@@ -83,21 +90,23 @@ private:
  // double proc_time;
     
     // save the time cost of msckf
-  std::vector<timeLog> logTimeCost;
+  std::vector<imgTimeLog> logTimeCost;
   
-  void saveTimeLog(const std::string &filename) {
+  void saveImgTimeLog(const std::string &filename) {
 
-    std::cout << std::endl << "Saving " << this->logTimeCost.size() << " records to time log file " << filename << " ..." << std::endl;
+    std::cout << std::endl << "Saving " << this->logTimeCost.size() << " image processing records to time log file " << filename << " ..." << std::endl;
 
     std::ofstream fFrameTimeLog;
     fFrameTimeLog.open(filename.c_str());
     fFrameTimeLog << std::fixed;
-    fFrameTimeLog << "#frame_time_stamp time_proc" << std::endl;
+    fFrameTimeLog << "#frame_time_stamp time_proc num_track" << std::endl;
     for(size_t i=0; i<this->logTimeCost.size(); i++)
     {
         fFrameTimeLog << std::setprecision(6)
                       << this->logTimeCost[i].time_stamp << " "
-                      << this->logTimeCost[i].time_cost << std::endl;
+                      << this->logTimeCost[i].time_cost  << " "
+		      << std::setprecision(0)
+                      << this->logTimeCost[i].num_track  << std::endl;
     }
     fFrameTimeLog.close();
 
