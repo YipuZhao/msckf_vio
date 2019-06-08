@@ -3,6 +3,9 @@
   <arg name="robot" default="firefly_sbx"/>
   <arg name="calibration_file"
     default="$(find msckf_vio)/config/camchain-imucam-euroc.yaml"/>
+  <arg name="cam0_topic" default="/cam0/image_raw"/>
+  <arg name="cam1_topic" default="/cam1/image_raw"/>
+  <arg name="imu_topic" default="/imu0"/>
 
   <!-- Image Processor Nodelet  -->
   <group ns="$(arg robot)">
@@ -22,10 +25,10 @@
       <param name="track_precision" value="0.01"/>
       <param name="ransac_threshold" value="3"/>
       <param name="stereo_threshold" value="5"/>
-
-      <remap from="~imu" to="/imu0"/>
-      <remap from="~cam0_image" to="/cam0/image_raw"/>
-      <remap from="~cam1_image" to="/cam1/image_raw"/>
+      
+      <remap from="~imu" to="$(arg imu_topic)"/>
+      <remap from="~cam0_image" to="$(arg cam0_topic)"/>
+      <remap from="~cam1_image" to="$(arg cam1_topic)"/>
 
     </node>
   </group>

@@ -3,13 +3,16 @@
   <arg name="robot" default="firefly_sbx"/>
   <arg name="fixed_frame_id" default="world"/>
   <arg name="calibration_file"
-    default="$(find msckf_vio)/config/camchain-imucam-euroc.yaml"/>
+    default="$(find msckf_vio)/config/camchain-imucam-fpv.yaml"/>
   <arg name="track_per_frame" default="70"/>
 
   <!-- Image Processor Nodelet  -->
   <include file="$(find msckf_vio)/launch/image_processor_gen_lmk$(arg track_per_frame).launch">
     <arg name="robot" value="$(arg robot)"/>
     <arg name="calibration_file" value="$(arg calibration_file)"/>
+    <arg name="cam0_topic" value="/snappy_cam/stereo_l"/>
+    <arg name="cam1_topic" value="/snappy_cam/stereo_r"/>
+    <arg name="imu_topic"  value="/snappy_imu"/>
   </include>
 
   <!-- Msckf Vio Nodelet  -->
@@ -22,7 +25,7 @@
       <rosparam command="load" file="$(arg calibration_file)"/>
 
       <param name="publish_tf" value="true"/>
-      <param name="frame_rate" value="20"/>
+      <param name="frame_rate" value="30"/>
       <param name="fixed_frame_id" value="$(arg fixed_frame_id)"/>
       <param name="child_frame_id" value="odom"/>
       <param name="max_cam_state_size" value="20"/>
@@ -36,10 +39,10 @@
       <param name="feature/config/translation_threshold" value="-1.0"/>
 
       <!-- These values should be standard deviation -->
-      <param name="noise/gyro" value="0.005"/>
-      <param name="noise/acc" value="0.05"/>
-      <param name="noise/gyro_bias" value="0.001"/>
-      <param name="noise/acc_bias" value="0.01"/>
+      <param name="noise/gyro" value="0.05"/>
+      <param name="noise/acc" value="0.1"/>
+      <param name="noise/gyro_bias" value="4e-5"/>
+      <param name="noise/acc_bias" value="0.002"/>
       <param name="noise/feature" value="0.035"/>
 
       <param name="initial_state/velocity/x" value="0.0"/>
