@@ -7,7 +7,7 @@
   <arg name="track_per_frame" default="70"/>
 
   <!-- Image Processor Nodelet  -->
-  <include file="$(find msckf_vio)/launch/image_processor_gen_lmk$(arg track_per_frame).launch">
+  <include file="$(find msckf_vio)/launch/image_processor_euroc_lmk$(arg track_per_frame).launch">
     <arg name="robot" value="$(arg robot)"/>
     <arg name="calibration_file" value="$(arg calibration_file)"/>
   </include>
