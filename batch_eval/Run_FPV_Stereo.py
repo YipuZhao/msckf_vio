@@ -73,8 +73,8 @@ for ri, num_gf in enumerate(Number_GF_List):
             proc_bag = subprocess.call(cmd_rosbag, shell=True)
 
             print bcolors.OKGREEN + "Finished rosbag playback, kill the process" + bcolors.ENDC
-            subprocess.call('rosnode kill /firefly_sbx/image_processor', shell=True)
-            subprocess.call('rosnode kill /firefly_sbx/vio', shell=True)
+            subprocess.call('rosnode kill /snap_dragon/image_processor', shell=True)
+            subprocess.call('rosnode kill /snap_dragon/vio', shell=True)
             # subprocess.call('pkill roslaunch', shell=True)
             # subprocess.call('pkill svo_node', shell=True)
 
