@@ -7,7 +7,7 @@ import signal
 
 # SeqNameList = ['indoor_forward_3', 'indoor_forward_5', 'indoor_forward_6', \
 #                'indoor_forward_7', 'indoor_forward_9', 'indoor_forward_10'];
-SeqNameList = ['indoor_forward_5'];
+SeqNameList = ['indoor_forward_3'];
 
 Result_root = '/mnt/DATA/tmp/UZH_FPV/msckf_Stereo_Speedx1/'
 
@@ -46,7 +46,7 @@ for ri, num_gf in enumerate(Number_GF_List):
             SeqName = SeqNameList[sn] #+ '_blur_9'
             print bcolors.ALERT + "Round: " + str(iteration + 1) + "; Seq: " + SeqName
 
-            File_rosbag   = '/mnt/DATA/Datasets/UZH_FPV/BagFiles/' + SeqName + '_snapdragon_with_gt.bag'
+            File_rosbag   = '/mnt/DATA/Datasets/UZH_FPV/BagFiles/' + SeqName + '_snapdragon_with_gt_new.bag'
 
             cmd_slam      = 'roslaunch msckf_vio msckf_vio_fpv.launch track_per_frame:=' + str(num_gf)
             cmd_rosbag    = 'rosbag play ' + File_rosbag + ' -r ' + str(rate) # + ' -u 30' # 

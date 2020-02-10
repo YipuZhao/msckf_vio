@@ -6,12 +6,15 @@
   <arg name="track_per_frame" default="70"/>
 
   <!-- Image Processor Nodelet  -->
-  <include file="$(find msckf_vio)/launch/image_processor_gen_lmk$(arg track_per_frame).launch">
+  <include file="$(find msckf_vio)/launch/image_processor_fpv_lmk$(arg track_per_frame).launch">
     <arg name="robot" value="$(arg robot)"/>
     <arg name="calibration_file" value="$(arg calibration_file)"/>
+<<<<<<< Updated upstream
+=======
     <arg name="cam0_topic" value="/snappy_cam/stereo_l_rf"/>
     <arg name="cam1_topic" value="/snappy_cam/stereo_r_rf"/>
     <arg name="imu_topic"  value="/snappy_imu"/>
+>>>>>>> Stashed changes
   </include>
 
   <!-- Msckf Vio Nodelet  -->

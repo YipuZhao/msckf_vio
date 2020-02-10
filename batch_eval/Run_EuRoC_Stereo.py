@@ -15,7 +15,7 @@ Result_root = '/mnt/DATA/tmp/EuRoC/msckf_Stereo_Speedx1/'
 
 rate = 1.0
 
-Number_GF_List = [70, 150, 200, 400]; 
+Number_GF_List = [200] # [70, 150, 200, 400]; 
 
 Num_Repeating = 10 # 20 # 1 # 
 SleepTime = 5
